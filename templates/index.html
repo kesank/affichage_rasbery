@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Info Transports, Météo & Football</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Bienvenue</h1>
+    <div id="horaireMAJ"></div>
+    <div class="menu-toggle">
+        <button onclick="showSection('horaires', true)">🚋 Transports</button>
+        <button onclick="showSection('meteo', true)">🌤️ Météo</button>
+        <button onclick="showSection('football', true)">⚽ Classements</button>
+    </div>
+
+    <div id="horaires" class="section active"></div>
+    <div id="meteo" class="section"></div>
+    <div id="football" class="section">
+    </div>
+    
+
+    <script>
+        const sections = ['horaires', 'meteo', 'football'];
+        let currentSectionIndex = 0;
+        let autoSwitch = true;
+
+        function showSection(id, manual = false) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+
+            if (manual) {
+                autoSwitch = false;
+                currentSectionIndex = sections.indexOf(id);
+                setTimeout(() => autoSwitch = true, 60000); // Reprise auto après 60s
+            }
+        }
+
+        function autoRotate() {
+            if (autoSwitch) {
+                currentSectionIndex = (currentSectionIndex + 1) % sections.length;
+                showSection(sections[currentSectionIndex]);
+            }
+        }
+
+        setInterval(autoRotate, 5000); // Rotation automatique toutes les 10s
+       
+       
+        async function HorairesMAJ() {
+            const res = await fetch("/api/horaires");
+            const data = await res.json();
+            const containerHoraire = document.getElementById("horaireMAJ");
+            //const containerHoraire = document.getElementById("horaires");
+            containerHoraire.innerHTML = `<h2 >Horaires (Maj ${data.maj})</h2> `;
+        }
+        async function fetchHoraires() {
+            const res = await fetch("/api/horaires");
+            const data = await res.json();
+            const container = document.getElementById("horaires");
+            //const containerHoraire = document.getElementById("horaires");
+            container.innerHTML = ``;
+
+            data.arrets.forEach(arret => {
+                const card = document.createElement("div");
+                card.className = "card";
+                card.innerHTML = `<h3>${arret.nom}</h3>`;
+
+                arret.horaires.forEach((h, i) => {
+                    let classes = "";
+                    if (i === 0) {
+                        classes = "urgent";
+                        if (h.minutes_restantes >= 0 && h.minutes_restantes < 5) {
+                            classes += " clignote";
+                        }
+                    }
+
+                    if (h.erreur) {
+                        card.innerHTML += `<p class="erreur">Erreur : ${h.erreur}</p>`;
+                    } else {
+                        card.innerHTML += `
+                            <p class="${classes}">
+                                ➜ ${h.destination}<br>
+                                Départ prévu à ${h.heure_prev}, attendu à ${h.heure_attendu} 
+                                (${h.minutes_restantes} min)
+                            </p>`;
+                    }
+                });
+
+                container.appendChild(card);
+            });
+        }
+
+        async function fetchMeteo() {
+            const res = await fetch("/api/meteo");
+            const data = await res.json();
+            const container = document.getElementById("meteo");
+            container.innerHTML = ``;
+            
+            data.villes.forEach(ville => {
+                const card = document.createElement("div");
+                card.className = "card";
+                if (ville.erreur) {
+                    card.innerHTML = `<h3>${ville.ville}</h3><p class="erreur">Erreur : ${ville.erreur}</p>`;
+                } else {
+                    card.innerHTML = `
+                        <h3>${ville.ville}</h3>
+                        <img src="${ville.icon}" class="icon" alt="icon">
+                        <p>${ville.description}</p>
+                        <p>Température : ${ville.temperature}°C (Ressenti : ${ville.ressenti}°C)</p>
+                        <p>Humidité : ${ville.humidite}%, Vent : ${ville.vent} m/s</p>
+                    `;
+                }
+                container.appendChild(card);
+            });
+        }
+
+        async function fetchFootball() {
+            const res = await fetch("/api/football");
+            const data = await res.json();
+            const container = document.getElementById("football");
+            container.innerHTML = ""; // ⚠️ vide le conteneur avant d'ajouter
+
+            for (const code in data) {
+                const league = data[code];
+                const card = document.createElement("div");
+                card.className = "card";
+
+                if (league.error) {
+                    card.innerHTML = `<h3>${code}</h3><p class="erreur">Erreur : ${league.error}</p>`;
+                } else {
+                    const standings = league.standings?.[0]?.table || [];
+
+                    let tableHTML = `
+                        <h3>${league.competition.name}</h3>
+                        <div class="classement">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Position</th>
+                                        <th>Équipe</th>
+                                        <th>Points</th>
+                                        <th>Journée</th>
+                                        <th>Victoire</th>
+                                        <th>Nul</th>
+                                        <th>Défaite</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                    `;
+
+                    standings.forEach(team => {
+                        tableHTML += `
+                            <tr>
+                                <td >${team.position}</td>
+                                <td>${team.team.shortName || team.team.name}</td>
+                                <td class="points">${team.points}</td>
+                                <td>${team.playedGames}</td>
+                                <td>${team.won}</td>
+                                <td>${team.draw}</td>
+                                <td>${team.lost}</td>
+                            </tr>
+                        `;
+                    });
+
+                    tableHTML += `
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+
+                    card.innerHTML = tableHTML;
+                }
+
+                container.appendChild(card);
+            }
+        }
+
+
+        function updateData() {
+            fetchHoraires();
+            fetchMeteo();
+            fetchFootball();
+            HorairesMAJ() ;
+        }
+
+        updateData();
+        setInterval(updateData, 60000); // mise à jour toutes les minutes
+    </script>
+</body>
+</html>

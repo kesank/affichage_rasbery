@@ -1,0 +1,148 @@
+body {
+    font-family: Helvetica, sans-serif;
+    background: #f0f0f0;
+    color: #333;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    background-color: #333;
+    color: white;
+    padding: 10px 0;
+    margin: 0;
+}
+
+.menu-toggle {
+    margin: 15px 0;
+}
+
+.menu-toggle button {
+    background: #FF9933;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 0 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.menu-toggle button:hover {
+    background-color: #e67e00;
+}
+
+.section {
+    display: none;
+    padding: 20px;
+}
+
+.section.active {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: white;
+    margin: 10px auto;
+    padding: 15px;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    text-align: left;
+}
+
+.card h3 {
+    margin-top: 0;
+    color: #FF9933;
+}
+
+.urgent {
+    color: red;
+    font-weight: bold;
+}
+
+.clignote {
+    animation: blink 1s infinite;
+}
+.marginB{
+    margin-bottom: 25px;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.icon {
+    width: 50px;
+    height: 50px;
+}
+
+.erreur {
+    color: darkred;
+    font-weight: bold;
+}
+
+.classement {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    margin-top: 20px;
+}
+
+.classement table {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    border-collapse: collapse;
+    background-color: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.classement th, .classement td {
+    padding: 12px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.classement th {
+    background-color: #f0f0f0;
+    color: #333;
+    font-weight: bold;
+}
+
+.classement tr:nth-child(odd) {
+    background-color: #f9f9f9;
+}
+
+.classement tr:nth-child(even) {
+    background-color: #e8e8e8;
+}
+
+.classement tr:hover {
+    background-color: #d4d4d4;
+}
+.classement td{
+    color: rgb(47, 43, 43);
+}
+.classement td.points{
+    color: red;
+}
+.card {
+    margin: 20px;
+    padding: 20px;
+    background-color: #333;
+    color: #fff;
+    border-radius: 10px;
+    text-align: left;
+}
+
+.card h3 {
+    color: #FF9933;
+}
