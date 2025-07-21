@@ -41,6 +41,7 @@ h1 {
 .section.active {
     display: flex;
     flex-wrap: wrap;
+    justify-content: center; 
 }
 
 .card {
@@ -52,6 +53,11 @@ h1 {
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     text-align: left;
+}
+.transport .card,.meteo .card {
+
+    max-width: 350px;
+
 }
 
 .card h3 {
@@ -135,8 +141,8 @@ h1 {
     color: red;
 }
 .card {
-    margin: 20px;
-    padding: 20px;
+    margin: 10px;
+    padding: 10px;
     background-color: #333;
     color: #fff;
     border-radius: 10px;

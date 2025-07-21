@@ -26,9 +26,29 @@ ARRETS = [
         "LineRef": "STIF:Line::C01843:"
     },
     {
-        "nom": "🚌 Bus 146 - Les Bosquets (Montfermeil)",
+        "nom": "🚌 Bus 146 - Les Bosquets (vers Bourget)",
         "MonitoringRef": "STIF:StopPoint:Q:427606:",
         "LineRef": "STIF:Line::C01171:"
+    },
+        {
+        "nom": "🚌 Bus 613 - Les Bosquets (vers Gare Aulnay sou Bois)",
+        "MonitoringRef": "STIF:StopPoint:Q:10068:",
+        "LineRef": "STIF:Line::C01581:"
+    },
+        {
+        "nom": "🚌 Bus 613 - Les Bosquets (vers Chelles-Gournay)",
+        "MonitoringRef": "STIF:StopPoint:Q:22599:",
+        "LineRef": "STIF:Line::C01581:"
+    },
+        {
+        "nom": "🚌 Bus 643 - Les Bosquets (vers Vert Galant)",
+        "MonitoringRef": "STIF:StopPoint:Q:10068:",
+        "LineRef": "STIF:Line::C02092:"
+    },
+        {
+        "nom": "🚌 Bus 643 - Les Bosquets (vers Neuilly sur Marne)",
+        "MonitoringRef": "STIF:StopPoint:Q:22599:",
+        "LineRef": "STIF:Line::C02092:"
     }
 ]
 
@@ -40,10 +60,11 @@ FOOTBALL_API_KEY = "ce602f8687f443cea2129e15f88c2c23"
 FOOTBALL_HEADERS = {"X-Auth-Token": FOOTBALL_API_KEY}
 FOOTBALL_URL = "https://api.football-data.org/v4/competitions"
 FOOTBALL_LEAGUES = {
+    "FL1": "Ligue 1",
     "PL": "Premier League",
     "SA": "Serie A",
     "BL1": "Bundesliga",
-    "FL1": "Ligue 1",
+    
     "PD": "Primera Division",
     "DED": "Eredivisie",
     "PPL": "Primeira Liga",
@@ -78,7 +99,7 @@ def get_horaires():
                 data = response.json()
                 visits = data.get("Siri", {}).get("ServiceDelivery", {}).get("StopMonitoringDelivery", [])[0].get("MonitoredStopVisit", [])
 
-                for i, visit in enumerate(visits[:5]):
+                for i, visit in enumerate(visits[:3]):
                     journey = visit["MonitoredVehicleJourney"]
                     call = journey["MonitoredCall"]
                     destination = journey.get("DestinationName", [{}])[0].get("value", "inconnu")
