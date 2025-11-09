@@ -152,3 +152,30 @@ h1 {
 .card h3 {
     color: #FF9933;
 }
+
+.logo-transport {
+    height: 36px;
+    width: auto;
+    margin-right: 10px;
+    vertical-align: middle;
+}
+
+.transport-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+
+@media (max-width: 1180px) {
+    .transport .card, .meteo .card {
+        max-width: 300px;
+        MAX-HEIGHT: 270PX;
+        overflow: hidden;
+        font-size: 14px;
+    }
+    .section{
+        padding: 7px;
+    }
+}

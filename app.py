@@ -5,6 +5,8 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 import threading
 import time
+import certifi
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -16,39 +18,46 @@ HEADERS = {"apiKey": API_KEY}
 
 ARRETS = [
     {
-        "nom": "🚋 T4 - Clichy-Montfermeil (vers Bondy)",
+        "nom": " Clichy-Montfermeil (vers Bondy RER)",
+        "ligne":"t4",
         "MonitoringRef": "STIF:StopPoint:Q:478661:",
         "LineRef": "STIF:Line::C01843:"
     },
     {
-        "nom": "🚋 T4 - Clichy-Montfermeil (vers Hôpital)",
+        "nom": " Clichy-Montfermeil (vers Hôpital)",
+        "ligne":"t4",
         "MonitoringRef": "STIF:StopPoint:Q:478664:",
         "LineRef": "STIF:Line::C01843:"
     },
     {
-        "nom": "🚌 Bus 146 - Les Bosquets (vers Bourget)",
+        "nom": "Les Bosquets (vers Bourget RER)",
+        "ligne":"146",
         "MonitoringRef": "STIF:StopPoint:Q:427606:",
         "LineRef": "STIF:Line::C01171:"
     },
         {
-        "nom": "🚌 Bus 613 - Les Bosquets (vers Gare Aulnay sou Bois)",
+        "nom": "Les Bosquets (vers Gare Aulnay sou Bois RER)",
+        "ligne":"613",
         "MonitoringRef": "STIF:StopPoint:Q:10068:",
         "LineRef": "STIF:Line::C01581:"
     },
         {
-        "nom": "🚌 Bus 613 - Les Bosquets (vers Chelles-Gournay)",
+        "nom": " Les Bosquets (vers Chelles-Gournay RER)",
+        "ligne":"613",
         "MonitoringRef": "STIF:StopPoint:Q:22599:",
         "LineRef": "STIF:Line::C01581:"
     },
         {
-        "nom": "🚌 Bus 643 - Les Bosquets (vers Vert Galant)",
-        "MonitoringRef": "STIF:StopPoint:Q:10068:",
-        "LineRef": "STIF:Line::C02092:"
+        "nom": " Romain Rolland (vers Sevran Livry RER)",
+        "ligne":"623",
+        "MonitoringRef": "STIF:StopPoint:Q:462938:",
+        "LineRef": "STIF:Line::C01589:"
     },
         {
-        "nom": "🚌 Bus 643 - Les Bosquets (vers Neuilly sur Marne)",
-        "MonitoringRef": "STIF:StopPoint:Q:22599:",
-        "LineRef": "STIF:Line::C02092:"
+        "nom": "Romain Rolland (vers Gagny RER)",
+        "ligne":"623",
+        "MonitoringRef": "STIF:StopPoint:Q:480824:",
+        "LineRef": "STIF:Line::C01589:"
     }
 ]
 
@@ -127,10 +136,38 @@ def get_horaires():
 
         resultat["arrets"].append({
             "nom": arret["nom"],
+            "ligne": arret["ligne"], 
             "horaires": horaires
         })
 
     return resultat
+
+
+def api_news():
+    try:
+        url = "https://gnews.io/api/v4/top-headlines"
+        params = {
+            'token': '6ee1f9a5eacab7ac46808e7099e64e49',  # remplace par ton vrai token GNews
+            'lang': 'fr',
+            'country': 'fr',
+            'max': 8
+        }
+        response = requests.get(url, params=params, verify=False)  # 🔥 désactive la vérif SSL
+
+        if response.status_code == 200:
+            data = response.json()
+            return {
+                "articles": [{
+                    "title": a["title"],
+                    "description": a.get("description", ""),
+                    "publishedAt": a.get("publishedAt", ""),
+                    "url": a["url"]
+                } for a in data.get("articles", [])]
+            }
+        else:
+            return {"erreur": f"Erreur API GNews : {response.status_code}"}
+    except Exception as e:
+        return {"erreur": str(e)}
 
 def get_meteo():
     resultats = {"maj": datetime.now(ZoneInfo("Europe/Paris")).strftime("%H:%M:%S"), "villes": []}
@@ -211,6 +248,10 @@ def api_meteo():
 @app.route("/api/football")
 def api_football():
     return jsonify(standings_cache)
+
+@app.route("/api/news")
+def news():
+    return jsonify(api_news())
 
 if __name__ == "__main__":
     app.run(debug=True)

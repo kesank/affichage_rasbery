@@ -6,22 +6,22 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <h1>Bienvenue</h1>
-    <div id="horaireMAJ"></div>
+    <!--<div id="horaireMAJ"></div>-->  
     <div class="menu-toggle">
         <button onclick="showSection('horaires', true)">🚋 Transports</button>
         <button onclick="showSection('meteo', true)">🌤️ Météo</button>
-        <button onclick="showSection('football', true)">⚽ Classements</button>
+        <button onclick="showSection('football', true)">⚽ Football</button>
+        <button onclick="showSection('news', true)">📰 Actualités</button>
     </div>
 
     <div id="horaires" class="section transport active"></div>
     <div id="meteo" class="section meteo"></div>
-    <div id="football" class="section foot">
-    </div>
+    <div id="football" class="section foot"> </div>
+    <div id="news" class="section news"></div>
     
 
     <script>
-        const sections = ['horaires', 'meteo', 'football'];
+        const sections = ['horaires', 'meteo', 'football',"news"];
         let currentSectionIndex = 0;
         let autoSwitch = true;
 
@@ -43,7 +43,7 @@
             }
         }
 
-        setInterval(autoRotate, 5000); // Rotation automatique toutes les 10s
+        // setInterval(autoRotate, 10000); // Rotation automatique toutes les 10s
        
        
         async function HorairesMAJ() {
@@ -57,13 +57,25 @@
             const res = await fetch("/api/horaires");
             const data = await res.json();
             const container = document.getElementById("horaires");
-            //const containerHoraire = document.getElementById("horaires");
             container.innerHTML = ``;
 
             data.arrets.forEach(arret => {
                 const card = document.createElement("div");
                 card.className = "card";
-                card.innerHTML = `<h3>${arret.nom}</h3>`;
+                console.log("Nom ligne:", arret.ligne);
+                console.log("Nom :", arret.nom);
+                // Génère le code HTML pour l'image de la ligne
+                const ligne = arret.ligne ? arret.ligne.toLowerCase() : "default"; // ex: "t4", "146", "613"
+                const imgSrc = `/static/img/${ligne}.png`; // chemin vers le logo de la ligne
+                const imgHTML = `<img src="${imgSrc}" alt="${arret.nom}" class="logo-transport">`;
+                console.log("Chargement image ligne:", imgSrc);
+                // Affiche le logo + nom de l'arrêt
+                card.innerHTML = `
+                    <div class="transport-header">
+                        ${imgHTML}
+                        <h3>${arret.nom}</h3>
+                    </div>
+                `;
 
                 arret.horaires.forEach((h, i) => {
                     let classes = "";
@@ -89,6 +101,7 @@
                 container.appendChild(card);
             });
         }
+
 
         async function fetchMeteo() {
             const res = await fetch("/api/meteo");
@@ -175,16 +188,54 @@
             }
         }
 
+        
+            async function fetchNews() {
+                const res = await fetch("/api/news");
+                const data = await res.json();
+                const container = document.getElementById("news");
+                container.innerHTML = "";
 
+                console.log("News API response:", data);
+
+                if (data.erreur) {
+                    container.innerHTML = `<p class="erreur">Erreur : ${data.erreur}</p>`;
+                    return;
+                }
+
+                data.articles.forEach(article => {
+                    // Formater la date
+                    let dateStr = "";
+                    if(article.publishedAt) {
+                        const date = new Date(article.publishedAt);
+                        dateStr = date.toLocaleString('fr-FR', { 
+                            weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+                            hour: '2-digit', minute: '2-digit'
+                        });
+                    }
+
+                    const card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `
+                        <h3>${article.title}</h3>
+                        <p><em>Publié le ${dateStr}</em></p>
+                        <p>${article.description || "Pas de description disponible."}</p>
+                        <p><a href="${article.url}" target="_blank">Lire l'article complet</a></p>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        
         function updateData() {
             fetchHoraires();
             fetchMeteo();
-            fetchFootball();
             HorairesMAJ() ;
         }
 
         updateData();
+        showSection('news', true);
         setInterval(updateData, 60000); // mise à jour toutes les minutes
+        setInterval(fetchNews(), 1800000);// mise à jour toutes les 30 minutes
+        setInterval(fetchFootball(), 86400000);//mise à jour toutes les 24h
     </script>
 </body>
 </html>
